@@ -1,4 +1,4 @@
-package userapi
+package handlers
 
 import (
 	"encoding/json"

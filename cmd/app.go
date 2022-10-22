@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Arcady1/Avito-2022/api/userapi"
+	"github.com/Arcady1/Avito-2022/pkg/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
@@ -33,7 +33,7 @@ func (a *App) InitDB(user, password, dbname string) {
 func (a *App) InitRoutes() {
 	a.Router = mux.NewRouter()
 
-	a.Router.HandleFunc("/api/v1/user/balance", userapi.GetUserBalance).Methods("GET")
+	a.Router.HandleFunc("/api/v1/user/balance", handlers.GetUserBalance).Methods("GET")
 }
 
 func (a *App) Run(host, port string) {
