@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Arcady1/Avito-2022/pkg/handlers"
+	"github.com/Arcady1/go-rest-api/pkg/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
