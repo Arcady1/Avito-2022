@@ -26,7 +26,7 @@ func (a *App) InitDB(user, password, dbname string) {
 
 	if err != nil {
 		err = errors.New("Error: connecting to the Database")
-		log.Fatal(err)
+		log.Fatalln(err)
 	} else {
 		a.DB = database
 	}
@@ -35,13 +35,14 @@ func (a *App) InitDB(user, password, dbname string) {
 func (a *App) InitRoutes() {
 	a.Router = mux.NewRouter()
 
-	a.Router.HandleFunc("/api/v1/user/balance", handlers.GetUserBalance).Methods("GET")
+	a.Router.HandleFunc("/api/v1/user/balance", handlers.GetUserBalance).Methods(http.MethodPost)
+	a.Router.HandleFunc("/api/v1/user/balance", handlers.IncreaseUserBalance).Methods(http.MethodPut)
 }
 
 func (a *App) Run(host, port string) {
 	listenAdress := fmt.Sprintf("%s:%s", host, port)
 
-	fmt.Printf("Started on: http://%s", listenAdress)
+	fmt.Println("Started on: http://" + listenAdress)
 
 	http.ListenAndServe(listenAdress, a.Router)
 
@@ -54,7 +55,7 @@ func main() {
 	err := godotenv.Load(".env")
 
 	if err != nil {
-		log.Fatal("Error: loading .env file")
+		log.Fatalln("Error: loading .env file")
 	}
 
 	// Inits
