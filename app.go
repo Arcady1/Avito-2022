@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/Arcady1/Avito-2022/api/userapi"
 	"github.com/gorilla/mux"
@@ -35,4 +36,6 @@ func (a *App) InitRoutes() {
 	a.Router.HandleFunc("/api/v1/user/balance", userapi.GetUserBalance).Methods("GET")
 }
 
-func (a *App) Run(host, port string) {}
+func (a *App) Run(host, port string) {
+	http.ListenAndServe(host+":"+port, a.Router)
+}
