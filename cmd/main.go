@@ -22,7 +22,7 @@ func (a *App) InitRoutes() {
 	a.Router.HandleFunc("/api/v1/user/balance", handlers.GetUserBalance).Methods(http.MethodPost)
 	a.Router.HandleFunc("/api/v1/user/refill", handlers.RefillUserAccount).Methods(http.MethodPut)
 	a.Router.HandleFunc("/api/v1/payments/reserve", handlers.ReserveUsersAccountMoney).Methods(http.MethodPost)
-	// a.Router.HandleFunc("/api/v1/payments/accept", handlers.AcceptReservedMoney).Methods(http.MethodPut)
+	a.Router.HandleFunc("/api/v1/payments/accept", handlers.AcceptReservedMoney).Methods(http.MethodPut)
 }
 
 func (a *App) Run(host, port string) {

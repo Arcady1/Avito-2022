@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-type accounts struct {
-	UserId string  `json:"userId"`
-	Amount float64 `json:"amount"`
-}
-
 func RefillUserAccount(userId string, amount float64) error {
 	log.Println("models.RefillUserAccount", userId, amount)
 
