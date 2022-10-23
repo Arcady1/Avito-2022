@@ -14,6 +14,10 @@ type balance struct {
 	UserId string `json:"userId"`
 }
 
+const (
+	ResponseErrGetUserBalance string = "Error: getting the user balance"
+)
+
 func GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	log.Println("handlers.GetUserBalance")
 
@@ -56,7 +60,13 @@ func GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	data, err, statusCode = models.GetAccountBalance(userBalance.UserId)
 	if err != nil {
 		log.Println(err)
-		utils.ResponseWriter(w, statusCode, ResponseErrRefillUserAccount, nil)
+		errMessage := ResponseErrGetUserBalance
+
+		if statusCode != http.StatusInternalServerError {
+			errMessage = err.Error()
+		}
+
+		utils.ResponseWriter(w, statusCode, errMessage, nil)
 		return
 	}
 

@@ -17,7 +17,7 @@ type refill struct {
 }
 
 const (
-	ResponseErrRefillUserAccount string = "Error on refill user account"
+	ResponseErrRefillUserAccount string = "Error: refilling user account"
 )
 
 func RefillUserAccount(w http.ResponseWriter, r *http.Request) {
