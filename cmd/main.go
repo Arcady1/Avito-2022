@@ -1,42 +1,26 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/Arcady1/go-rest-api/pkg/handlers"
+	"github.com/Arcady1/go-rest-api/pkg/models"
+	"github.com/Arcady1/go-rest-api/pkg/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 type App struct {
 	Router *mux.Router
-	DB     *sql.DB
-}
-
-func (a *App) InitDB(user, password, dbname string) {
-	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s", user, password, dbname)
-
-	database, err := sql.Open("postgres", dbInfo)
-
-	if err != nil {
-		err = errors.New("Error: connecting to the Database")
-		log.Fatalln(err)
-	} else {
-		a.DB = database
-	}
 }
 
 func (a *App) InitRoutes() {
 	a.Router = mux.NewRouter()
 
 	a.Router.HandleFunc("/api/v1/user/balance", handlers.GetUserBalance).Methods(http.MethodPost)
-	a.Router.HandleFunc("/api/v1/user/balance", handlers.IncreaseUserBalance).Methods(http.MethodPut)
+	a.Router.HandleFunc("/api/v1/user/refill", handlers.RefillUserAccount).Methods(http.MethodPut)
 }
 
 func (a *App) Run(host, port string) {
@@ -44,8 +28,9 @@ func (a *App) Run(host, port string) {
 
 	fmt.Println("Started on: http://" + listenAdress)
 
-	http.ListenAndServe(listenAdress, a.Router)
+	err := http.ListenAndServe(listenAdress, a.Router)
 
+	utils.CheckError(err, "Error: http.ListenAndServe")
 }
 
 func main() {
@@ -54,12 +39,10 @@ func main() {
 	// Load .env file
 	err := godotenv.Load(".env")
 
-	if err != nil {
-		log.Fatalln("Error: loading .env file")
-	}
+	utils.CheckError(err, "Error: loading .env file")
 
 	// Inits
-	a.InitDB(
+	models.InitDB(
 		os.Getenv("APP_DB_USERNAME"),
 		os.Getenv("APP_DB_PASSWORD"),
 		os.Getenv("APP_DB_NAME"))

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -12,6 +13,8 @@ type tmpResponse struct {
 }
 
 func GetUserBalance(w http.ResponseWriter, r *http.Request) {
+	log.Println("GetUserBalance")
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

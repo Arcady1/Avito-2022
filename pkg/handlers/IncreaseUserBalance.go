@@ -11,9 +11,26 @@ import (
 	"github.com/Arcady1/go-rest-api/pkg/utils"
 )
 
-func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
+type refill struct {
+	UserId string  `json:"userId"`
+	Amount float64 `json:"amount"`
+}
+
+var refillPatterns = map[string]string{
+	"UserId": "^(.+)$",
+	"Amount": "^(([1-9][0-9]*(\\.[0-9]{1,2})?)|(0\\.((0[1-9])|([1-9][0-9]?))))$",
+}
+
+const (
+	ResponseErrRefillUserAccount string = "Error on refill user account"
+)
+
+func RefillUserAccount(w http.ResponseWriter, r *http.Request) {
+	log.Println("handlers.RefillUserAccount")
+
+	var successResponse string
+
 	// Read the request body
-	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -22,9 +39,9 @@ func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Try to save balance in a variable
-	var balance models.Balance
-	err = json.Unmarshal(body, &balance)
+	// Try to save the amount in a variable
+	var refillAccount refill
+	err = json.Unmarshal(body, &refillAccount)
 
 	if err != nil {
 		log.Println(err)
@@ -33,7 +50,7 @@ func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate userId
-	err = utils.CheckQuery(r, balance.UserId, models.BalancePatterns["UserId"])
+	err = utils.CheckQuery(r, refillAccount.UserId, refillPatterns["UserId"])
 	if err != nil {
 		log.Println(err)
 		utils.ResponseWriter(w, 400, utils.ResponseErrWrongData, nil)
@@ -41,16 +58,32 @@ func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate amount
-	err = utils.CheckQuery(r, fmt.Sprintf("%v", balance.Amount), models.BalancePatterns["Amount"])
+	err = utils.CheckQuery(r, fmt.Sprintf("%v", refillAccount.Amount), refillPatterns["Amount"])
 	if err != nil {
 		log.Println(err)
 		utils.ResponseWriter(w, 400, utils.ResponseErrWrongData, nil)
 		return
 	}
 
-	// Increase the user balance
-	// TODO
+	// Close body
+	r.Body.Close()
+
+	// Prepare amount value
+	refillAccount.Amount, err = utils.PrepareAmountValue(refillAccount.Amount)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, 500, ResponseErrRefillUserAccount, nil)
+		return
+	}
+
+	// Refill the user account
+	successResponse, err = models.RefillUserAccount(refillAccount.UserId, refillAccount.Amount)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, 500, ResponseErrRefillUserAccount, nil)
+		return
+	}
 
 	// Send a response
-	utils.ResponseWriter(w, http.StatusOK, "TODO", nil)
+	utils.ResponseWriter(w, http.StatusOK, successResponse, nil)
 }
