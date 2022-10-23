@@ -2,29 +2,64 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/Arcady1/go-rest-api/pkg/models"
+	"github.com/Arcady1/go-rest-api/pkg/utils"
 )
 
-type tmpResponse struct {
-	val string
-	num int
+type balance struct {
+	UserId string `json:"userId"`
 }
 
 func GetUserBalance(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetUserBalance")
+	log.Println("handlers.GetUserBalance")
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	// Read the request body
+	body, err := ioutil.ReadAll(r.Body)
 
-	resp := tmpResponse{"test", 10}
-
-	jsonResponse, jsonError := json.Marshal(resp)
-
-	if jsonError != nil {
-		fmt.Println("Unable to encode JSON")
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, http.StatusInternalServerError, utils.ResponseErrWrongBodyFormat, nil)
+		return
 	}
 
-	w.Write(jsonResponse)
+	// Try to save the user ID in a variable
+	var userBalance balance
+
+	err = json.Unmarshal(body, &userBalance)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, http.StatusBadRequest, utils.ResponseErrWrongBodyFormat, nil)
+		return
+	}
+
+	// Validate userId
+	err = utils.CheckQuery(r, userBalance.UserId, bodyPatterns["UserId"])
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, http.StatusBadRequest, utils.ResponseErrWrongData, nil)
+		return
+	}
+
+	// Close body
+	r.Body.Close()
+
+	// Get the user balance
+	var (
+		data       interface{}
+		statusCode int
+	)
+
+	data, err, statusCode = models.GetAccountBalance(userBalance.UserId)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, statusCode, ResponseErrRefillUserAccount, nil)
+		return
+	}
+
+	// Send a response
+	utils.ResponseWriter(w, http.StatusOK, utils.ResponseSuccess, data)
 }

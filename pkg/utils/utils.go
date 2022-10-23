@@ -20,6 +20,7 @@ const (
 	ResponseErrWrongBodyFormat string = "Wrong body format"
 	ResponseErrWrongData       string = "Wrong data"
 	ResponseOK                 string = "ok"
+	ResponseSuccess            string = "success"
 )
 
 func ResponseWriter(w http.ResponseWriter, statusCode int, message string, data interface{}) {
