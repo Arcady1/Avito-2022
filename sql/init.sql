@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS orders (
 	order_id VARCHAR PRIMARY KEY NOT NULL,
 	account_id VARCHAR NOT NULL,
 	service_id VARCHAR NOT NULL,
-	amount FLOAT NOT NULL,
+	cost FLOAT NOT NULL,
 	status VARCHAR NOT NULL,
   	CONSTRAINT fk_order_account
     	FOREIGN KEY(account_id) 

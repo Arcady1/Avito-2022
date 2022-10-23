@@ -89,3 +89,34 @@ func updateUserAccountBalance(accountId string, balance float64) error {
 
 	return nil
 }
+
+func createdNewOrder(accountId, serviceId, orderId string, cost float64) error {
+	log.Println("models.createdNewOrder", accountId, serviceId, orderId, cost)
+
+	_, err := DB.Query("INSERT INTO orders(order_id, account_id, service_id, cost, status) VALUES ($1, $2, $3, $4, 'reserved');", orderId, accountId, serviceId, cost)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ReserveMoney(accountId, serviceId, orderId string, cost, accountBalance float64) error {
+	log.Println("models.ReserveMoney", accountId, serviceId, orderId, cost)
+
+	// Write-off money from the user's account
+	newBalance := accountBalance - cost
+
+	err := updateUserAccountBalance(accountId, newBalance)
+	if err != nil {
+		return err
+	}
+
+	// Reserve money
+	err = createdNewOrder(accountId, serviceId, orderId, cost)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

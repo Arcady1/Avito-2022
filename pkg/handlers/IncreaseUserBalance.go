@@ -77,5 +77,5 @@ func RefillUserAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send a response
-	utils.ResponseWriter(w, http.StatusOK, utils.ResponseSuccess, nil)
+	utils.ResponseWriter(w, http.StatusCreated, utils.ResponseSuccess, nil)
 }
