@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/Arcady1/go-rest-api/pkg/models"
+	"github.com/Arcady1/go-rest-api/pkg/utils"
 )
 
 func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
@@ -16,23 +17,40 @@ func IncreaseUserBalance(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		err = errors.New("Error: decode request body")
-		log.Fatalln(err)
+		log.Println(err)
+		utils.ResponseWriter(w, 500, utils.ResponseErrWrongBodyFormat, nil)
+		return
 	}
 
+	// Try to save balance in a variable
 	var balance models.Balance
 	err = json.Unmarshal(body, &balance)
 
 	if err != nil {
-		err = errors.New("Error: wrong body format")
-		log.Fatalln(err)
+		log.Println(err)
+		utils.ResponseWriter(w, 400, utils.ResponseErrWrongBodyFormat, nil)
+		return
+	}
+
+	// Validate userId
+	err = utils.CheckQuery(r, balance.UserId, models.BalancePatterns["UserId"])
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, 400, utils.ResponseErrWrongData, nil)
+		return
+	}
+
+	// Validate amount
+	err = utils.CheckQuery(r, fmt.Sprintf("%v", balance.Amount), models.BalancePatterns["Amount"])
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, 400, utils.ResponseErrWrongData, nil)
+		return
 	}
 
 	// Increase the user balance
 	// TODO
 
 	// Send a response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("Done")
+	utils.ResponseWriter(w, http.StatusOK, "TODO", nil)
 }
