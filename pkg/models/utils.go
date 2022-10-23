@@ -112,7 +112,9 @@ func updateUserAccountBalance(accountId string, balance float64) error {
 func createdNewOrder(accountId, serviceId, orderId string, cost float64) error {
 	log.Println("models.createdNewOrder", accountId, serviceId, orderId, cost)
 
-	_, err := DB.Query("INSERT INTO orders(order_id, account_id, service_id, cost, status) VALUES ($1, $2, $3, $4, 'reserved');", orderId, accountId, serviceId, cost)
+	id := uuid.New().String()
+
+	_, err := DB.Query("INSERT INTO orders(id, order_id, account_id, service_id, cost, status) VALUES ($1, $2, $3, $4, $5, 'reserved');", id, orderId, accountId, serviceId, cost)
 	if err != nil {
 		return err
 	}
@@ -123,16 +125,16 @@ func createdNewOrder(accountId, serviceId, orderId string, cost float64) error {
 func reserveMoney(accountId, serviceId, orderId string, cost, accountBalance float64) error {
 	log.Println("models.reserveMoney", accountId, serviceId, orderId, cost)
 
-	// Write-off money from the user's account
-	newBalance := accountBalance - cost
-
-	err := updateUserAccountBalance(accountId, newBalance)
+	// Reserve money
+	err := createdNewOrder(accountId, serviceId, orderId, cost)
 	if err != nil {
 		return err
 	}
 
-	// Reserve money
-	err = createdNewOrder(accountId, serviceId, orderId, cost)
+	// Write-off money from the user's account if there is no error on reserving money
+	newBalance := accountBalance - cost
+
+	err = updateUserAccountBalance(accountId, newBalance)
 	if err != nil {
 		return err
 	}
@@ -140,18 +142,18 @@ func reserveMoney(accountId, serviceId, orderId string, cost, accountBalance flo
 	return nil
 }
 
-func updateOrder(accountId, serviceId, orderId, status string) error {
+func updateOrder(accountId, serviceId, orderId, status string, amount float64) error {
 	log.Println("models.updateOrder", accountId, serviceId, orderId, status)
 
 	// Update order status 'canceled'
 	if status == "canceled" {
-		_, err := DB.Query("UPDATE orders SET status = 'canceled', cost = 0 WHERE (account_id = $1) AND (order_id = $2) AND (service_id = $3);", accountId, orderId, serviceId)
+		_, err := DB.Query("UPDATE orders SET status = 'canceled' WHERE (account_id = $1) AND (order_id = $2) AND (service_id = $3);", accountId, orderId, serviceId)
 		if err != nil {
 			return err
 		}
 	} else if status == "succeed" {
 		// Update order status 'succeed'
-		_, err := DB.Query("UPDATE orders SET status = 'succeed' WHERE (account_id = $1) AND (order_id = $2) AND (service_id = $3);", accountId, orderId, serviceId)
+		_, err := DB.Query("UPDATE orders SET status = 'succeed', cost = $1 WHERE (account_id = $2) AND (order_id = $3) AND (service_id = $4);", amount, accountId, orderId, serviceId)
 		if err != nil {
 			return err
 		}
@@ -160,17 +162,17 @@ func updateOrder(accountId, serviceId, orderId, status string) error {
 	return nil
 }
 
-func updateMoneyReserve(accountId, serviceId, orderId, status string, orderCost float64) error {
-	log.Println("models.updateMoneyReserve", accountId, serviceId, orderId, orderCost)
+func updateMoneyReserve(accountId, serviceId, orderId, status string, orderCost, amount float64) error {
+	log.Println("models.updateMoneyReserve", accountId, serviceId, orderId, orderCost, amount)
 
 	// Update the order
-	err := updateOrder(accountId, serviceId, orderId, status)
+	err := updateOrder(accountId, serviceId, orderId, status, amount)
 	if err != nil {
 		return err
 	}
 
-	// Refund the user if it is impossible to write off the money
-	if status == "canceled" {
+	// Refund the user if it is impossible to write off the money OR 'amount < orderCost'
+	if status == "succeed" {
 		var (
 			accountBalance float64
 			newBalance     float64
@@ -182,8 +184,8 @@ func updateMoneyReserve(accountId, serviceId, orderId, status string, orderCost 
 			return err
 		}
 
-		// Update the user's account balance
-		newBalance = accountBalance + orderCost
+		// Update the user's account balance. 'orderCost - amount' != 0 when the 'amount < orderCost'
+		newBalance = accountBalance + (orderCost - amount)
 
 		err = updateUserAccountBalance(accountId, newBalance)
 		if err != nil {

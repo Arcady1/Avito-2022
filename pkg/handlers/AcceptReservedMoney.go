@@ -68,11 +68,19 @@ func AcceptReservedMoney(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate Cost
+	// Validate Amount
 	err = utils.CheckQuery(r, fmt.Sprintf("%v", moneyAccept.Amount), bodyPatterns["Amount"])
 	if err != nil {
 		log.Println(err)
 		utils.ResponseWriter(w, http.StatusBadRequest, utils.ResponseErrWrongData, nil)
+		return
+	}
+
+	// Prepare amount value
+	moneyAccept.Amount, err = utils.PrepareAmountValue(moneyAccept.Amount)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, http.StatusInternalServerError, ResponseErrAcceptReservedMoney, nil)
 		return
 	}
 

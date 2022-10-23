@@ -76,6 +76,14 @@ func ReserveUsersAccountMoney(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Prepare cost value
+	moneyReserve.Cost, err = utils.PrepareAmountValue(moneyReserve.Cost)
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWriter(w, http.StatusInternalServerError, ResponseErrReserveUsersAccountMoney, nil)
+		return
+	}
+
 	// Close body
 	r.Body.Close()
 

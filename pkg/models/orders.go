@@ -97,6 +97,13 @@ func AcceptReservedMoney(userId, serviceId, orderId string, amount float64) (err
 		return err, http.StatusNotFound
 	}
 
+	// If the order status is not 'reserved', return an error
+	if order.Status != "reserved" {
+		errorMessage := fmt.Sprintf("The order is not reserved. The order status is '%s'", order.Status)
+		err = errors.New(errorMessage)
+		return err, http.StatusNotAcceptable
+	}
+
 	// Update money reserve status
 	var reserveStatus string
 
@@ -108,7 +115,7 @@ func AcceptReservedMoney(userId, serviceId, orderId string, amount float64) (err
 	}
 
 	// Update money reserve
-	err = updateMoneyReserve(accountId, serviceId, orderId, reserveStatus, order.Cost)
+	err = updateMoneyReserve(accountId, serviceId, orderId, reserveStatus, order.Cost, amount)
 	if err != nil {
 		return err, http.StatusInternalServerError
 	}
