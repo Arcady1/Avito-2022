@@ -59,7 +59,7 @@ func findOrder(order *orders, accountId, serviceId, orderId string) error {
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&order.OrderId, &order.AccountId, &order.ServiceId, &order.Cost, &order.Status)
+		err = rows.Scan(&order.Id, &order.OrderId, &order.AccountId, &order.ServiceId, &order.Cost, &order.Status)
 		if err != nil {
 			return err
 		}

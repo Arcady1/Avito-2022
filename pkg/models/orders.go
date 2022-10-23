@@ -8,6 +8,7 @@ import (
 )
 
 type orders struct {
+	Id        string  `json:"Id"`
 	OrderId   string  `json:"orderId"`
 	AccountId string  `json:"accountId"`
 	ServiceId string  `json:"serviceId"`
@@ -49,6 +50,20 @@ func ReserveUsersAccountMoney(userId, serviceId, orderId string, cost float64) (
 	if accountBalance < cost {
 		err = errors.New("The 'cost' is greater than the user's balance")
 		return err, http.StatusNotAcceptable
+	}
+
+	// If the order with this 'serviceId' already exists
+	var order orders
+
+	err = findOrder(&order, accountId, serviceId, orderId)
+	if err != nil {
+		return err, http.StatusInternalServerError
+	}
+
+	// If the order exists, return an error
+	if (orders{}) != order {
+		err = errors.New("The order already exists")
+		return err, http.StatusBadRequest
 	}
 
 	// Reserve money
