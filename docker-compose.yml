@@ -1,0 +1,20 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=${APP_DB_USERNAME}
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD}
+      - POSTGRES_DB=${APP_DB_NAME}
+      - DATABASE_HOST=${APP_DB_HOST}
+    ports:
+      - '${APP_DB_PORT}:${APP_DB_PORT}'

@@ -10,8 +10,8 @@ import (
 
 var DB *sql.DB
 
-func InitDB(user, password, dbname string) {
-	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
+func InitDB(user, password, host, dbname string) {
+	dbInfo := fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable", user, password, host, dbname)
 
 	var err error
 	DB, err = sql.Open("postgres", dbInfo)

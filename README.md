@@ -1,3 +1,29 @@
+# Avito Golang REST API
+
+## Скачивание и настройка проекта
+```bash
+$ git clone https://github.com/Arcady1/go-rest-api.git
+$ cd go-rest-api/
+$ mv .env.dev .env
+```
+
+## Docker
+
+Запуск: 
+
+```bash
+$ docker-compose up --build
+```
+
+Остановка:
+```bash
+$ docker-compose down
+```
+
+## Тесты
+
+<!-- TODO -->
+
 ## API
 
 Базовый URL: 
@@ -324,9 +350,11 @@ Body {
 | cost       | FLOAT   | NOT NULL             |
 | status     | VARCHAR | NOT NULL             |
 
-
+## License
+MIT
 
 TODO:
 1. Покрыть код тестами.
 2. Использовать docker-compose.
 3. Написать инструкцию по запуску.
+4. Проверить арфографию и пунктуацию.
