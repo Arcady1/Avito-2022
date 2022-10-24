@@ -20,9 +20,9 @@ $ docker-compose up --build
 $ docker-compose down
 ```
 
-## Тесты
+## Настройка базы данных
 
-<!-- TODO -->
+Для создания необходимых таблиц, нужно запустить SQL скрипт `/sql/init.sql`.
 
 ## API
 
