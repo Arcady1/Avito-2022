@@ -1,4 +1,4 @@
-# Avito Golang REST API
+# Payment REST API
 
 ## Скачивание и настройка проекта
 ```bash
