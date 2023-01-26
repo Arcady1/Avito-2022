@@ -1,4 +1,4 @@
-module github.com/Arcady1/go-rest-api
+module github.com/Arcady1/Go-payment-API
 
 go 1.19
 
