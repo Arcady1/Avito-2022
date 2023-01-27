@@ -9,7 +9,3 @@ require (
 	github.com/lib/pq v1.10.7 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
 )
-
-replace (
-	github.com/Arcady1/go-rest-api => github.com/Arcady1/Go-payment-API
-)
